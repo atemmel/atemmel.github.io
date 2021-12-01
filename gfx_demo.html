@@ -1,9 +1,94 @@
 <html>
 	<head>
 		<meta charset="UTF-8">
+		<style>
+.transform-box {
+	display: inline-block;
+	padding: 1em;
+	margin: 1em;
+	background-color: #CCC;
+	border: 2px solid #EEE;
+	border-radius: 1em;
+	text-align: center;
+}
+
+.over {
+	border: 2px dotted #666;
+}
+
+.handle {
+    width: 0;
+    height: 0;
+    border-right: 20px dashed transparent;
+    border-top: 20px dashed #444;
+    cursor: move;
+	margin: -1em;
+}
+
+.title {
+	font-size: 1.2em;
+}
+
+body {
+	font-family: consolas;
+}
+
+		</style>
 	</head>
 	<body>
-		 <canvas id="draw" width="1200" height="720"></canvas>
-		 <script src="gfx_demo.js"></script>
+		<div style="width: 1200px; margin: 0 auto;">
+			<canvas id="draw" width="1200" height="720" style="border: 1px solid black"></canvas>
+			<div id="transform-box-container">
+				<div class="transform-box" id="translation-div" draggable="true">
+					<div class="handle"></div>
+					<span class="title">Translation</span>
+					<div>
+						<label for="translation-x">X:</label>
+						<input type="range" id="translation-x" name="translation-x" min="-5" max="5", value="1", step="0.01">
+					</div>
+					<div>
+						<label for="translation-y">Y:</label>
+						<input type="range" id="translation-y" name="translation-y" min="-5" max="5", value="1", step="0.01">
+					</div>
+					<div>
+						<label for="translation-y">Z:</label>
+						<input type="range" id="translation-z" name="translation-z" min="-5" max="5", value="1", step="0.01">
+					</div>
+				</div>
+				<div class="transform-box" id="rotation-div" draggable="true">
+					<div class="handle"></div>
+					<span class="title">Rotate</span>
+					<div>
+						<label for="rotate-x">X:</label>
+						<input type="range" id="rotate-x" name="rotate-x" min="0" max="3.14159265359", value="0", step="0.001">
+					</div>
+					<div>
+						<label for="rotate-y">Y:</label>
+						<input type="range" id="rotate-y" name="rotate-y" min="0" max="3.141592653595", value="0", step="0.001">
+					</div>
+					<div>
+						<label for="rotate-y">Z:</label>
+						<input type="range" id="rotate-z" name="rotate-z" min="0" max="3.141592653595", value="0", step="0.001">
+					</div>
+				</div>
+				<div class="transform-box" id="scaling-div" draggable="true">
+					<div class="handle"></div>
+					<span class="title">Scale</span>
+					<div>
+						<label for="scale-x">X:</label>
+						<input type="range" id="scale-x" name="scale-x" min="1" max="5", value="1", step="0.01">
+					</div>
+					<div>
+						<label for="translation-y">Y:</label>
+						<input type="range" id="scale-y" name="scale-y" min="1" max="5", value="1", step="0.01">
+					</div>
+					<div>
+						<label for="translation-y">Z:</label>
+						<input type="range" id="scale-z" name="scale-z" min="1" max="5", value="1", step="0.01">
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="gfx_demo.js"></script>
 	</body>
 </html>

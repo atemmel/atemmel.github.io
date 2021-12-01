@@ -1,4 +1,4 @@
-"use strict";
+";use strict";
 
 const canvas = document.getElementById("draw");
 const ctx = canvas.getContext("2d");
@@ -8,8 +8,6 @@ var dragOffset = {
 	y: 0,
 };
 
-var rotateX = 0;
-var rotateY = Math.PI;
 var mouseIsDown = false;
 var perspective = Perspective(60, 0.1, 100);
 
@@ -140,6 +138,9 @@ function NewTransform(translate, scale, rotate) {
 		translate: translate,
 		scale: scale,
 		rotate: rotate,
+		rotateX: 0,
+		rotateY: 0,
+		rotateZ: 0,
 	};
 }
 
@@ -175,10 +176,12 @@ function DrawPoints(points) {
 }
 
 function DrawGrid(points) {
+	ctx.strokeStyle = "#aaaaaa";
 	for(var i = 0; i < points.length; i++) {
 		DrawLine(points[i], points[i + 1]);
 		i++;
 	}
+	ctx.strokeStyle = "#000000";
 }
 
 function DrawLegend(points) {
@@ -246,8 +249,10 @@ const grid = function() {
 var cameraTransform = NewTransform(
 	TranslateMat4(2, 2, 0), 
 	Identity(), 
-	Rotate(rotateY, rotateX, 0),
+	Rotate(0, Math.PI, 0),
 );
+
+cameraTransform.rotateY = Math.PI;
 
 var legendTransform = NewTransform(
 	Identity(), 
@@ -267,6 +272,12 @@ var gridTransform = NewTransform(
 	Identity(),
 );
 
+var manipulatedTransform = NewTransform(
+	Identity(),
+	Identity(),
+	Identity(),
+);
+
 function TransformAndDrawLegend() {
 	var transformPre = DoInplaceTransform(legendTransform, perspective);
 	var transformPost = DoRegularTransform(cameraTransform);
@@ -275,10 +286,48 @@ function TransformAndDrawLegend() {
 	DrawLegend(transformedLegend);
 }
 
+function CalcManipulatedTransform() {
+	const container = document.getElementById("transform-box-container");
+	var order = [];
+	Array.from(container.children).forEach(child => {
+		const titles = child.getElementsByClassName("title");
+		if(titles.length < 1) {
+			return;
+		}
+		switch(titles[0].firstChild.data) {
+			case "Translation":
+				order.push("translate");
+				break;
+			case "Scale":
+				order.push("scale");
+				break;
+			case "Rotate":
+				order.push("rotate");
+				break;
+		}
+	});
+
+	console.log(order);
+
+	var rx = manipulatedTransform.rotateX;
+	var ry = manipulatedTransform.rotateY;
+	var rz = manipulatedTransform.rotateZ;
+	manipulatedTransform.rotate = Rotate(rx, ry, rz);
+
+	var transform = Identity();
+	for(var i = 0; i < order.length; i++) {
+		transform = Mat4MultiplyMat4(transform, manipulatedTransform[order[i]]);
+	}
+	console.log(transform);
+	return transform;
+}
+
 function TransformAndDrawBox() {
 	var transformPre = DoRegularTransform(boxTransform);
 	var transformPost = DoRegularTransform(cameraTransform);
 	var transform = Mat4MultiplyMat4(transformPre, transformPost);
+	var additionalTransform = CalcManipulatedTransform();
+	transform = Mat4MultiplyMat4(transform, additionalTransform);
 	var transformedBox = Array.from(box, point => Mat4MultiplyVec4(transform, point));
 	DrawPoints(transformedBox);
 }
@@ -289,6 +338,14 @@ function TransformAndDrawGrid() {
 	var transform = Mat4MultiplyMat4(transformPre, transformPost);
 	var transformedGrid = Array.from(grid, point => Mat4MultiplyVec4(transform, point));
 	DrawGrid(transformedGrid);
+}
+
+function DrawEverythingOnceAgain() {
+	cameraTransform.rotate = Rotate(cameraTransform.rotateY, cameraTransform.rotateX, 0);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	TransformAndDrawBox();
+	TransformAndDrawGrid();
+	TransformAndDrawLegend();
 }
 
 canvas.onmousedown = function(e){
@@ -302,7 +359,6 @@ canvas.onmouseup = function(){
 
 canvas.onmousemove = function(e){
     if(!mouseIsDown) return;
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	var dx = e.pageX - dragOffset.x;
 	var dy = e.pageY - dragOffset.y;
@@ -310,17 +366,136 @@ canvas.onmousemove = function(e){
 	dragOffset.x = e.pageX;
 	dragOffset.y = e.pageY;
 
-	rotateX += dx * 0.005;
-	rotateY -= dy * 0.005;
+	cameraTransform.rotateX += dx * 0.005;
+	cameraTransform.rotateY -= dy * 0.005;
 
-	cameraTransform.rotate = Rotate(rotateY, rotateX, 0);
-
-	TransformAndDrawBox();
-	TransformAndDrawGrid();
-	TransformAndDrawLegend();
+	DrawEverythingOnceAgain();
     return false;
 }
 
-TransformAndDrawBox();
-TransformAndDrawGrid();
-TransformAndDrawLegend();
+function SetupOnInputCallbacks() {
+
+	const translateX = document.getElementById("translation-x");
+	const translateY = document.getElementById("translation-y");
+	const translateZ = document.getElementById("translation-z");
+
+	const scaleX = document.getElementById("scale-x");
+	const scaleY = document.getElementById("scale-y");
+	const scaleZ = document.getElementById("scale-z");
+
+	const rotateX = document.getElementById("rotate-x");
+	const rotateY = document.getElementById("rotate-y");
+	const rotateZ = document.getElementById("rotate-z");
+
+	translateX.oninput = function(e) {
+		manipulatedTransform.translate[0][3] = e.target.value;
+		DrawEverythingOnceAgain();
+	}
+
+	translateY.oninput = function(e) {
+		manipulatedTransform.translate[1][3] = e.target.value;
+		DrawEverythingOnceAgain();
+	}
+
+	translateZ.oninput = function(e) {
+		manipulatedTransform.translate[2][3] = e.target.value;
+		DrawEverythingOnceAgain();
+	}
+
+	scaleX.oninput = function(e) {
+		manipulatedTransform.scale[0][0] = e.target.value;
+		DrawEverythingOnceAgain();
+	}
+
+	scaleY.oninput = function(e) {
+		manipulatedTransform.scale[1][1] = e.target.value;
+		DrawEverythingOnceAgain();
+	}
+
+	scaleZ.oninput = function(e) {
+		manipulatedTransform.scale[2][2] = e.target.value;
+		DrawEverythingOnceAgain();
+	}
+
+	rotateX.oninput = function(e) {
+		manipulatedTransform.rotateX = e.target.value;
+		DrawEverythingOnceAgain();
+	};
+
+	rotateY.oninput = function(e) {
+		manipulatedTransform.rotateY = e.target.value;
+		DrawEverythingOnceAgain();
+	};
+
+	rotateZ.oninput = function(e) {
+		manipulatedTransform.rotateZ = e.target.value;
+		DrawEverythingOnceAgain();
+	};
+
+	handles = document.querySelectorAll('.handle');
+	boxes = document.querySelectorAll('.transform-box');
+	boxes.forEach(function(item) {
+		item.addEventListener('dragstart', handleDragStart);
+		item.addEventListener('dragover', handleDragOver);
+		item.addEventListener('dragenter', handleDragEnter);
+		item.addEventListener('dragleave', handleDragLeave);
+		item.addEventListener('dragend', handleDragEnd);
+		item.addEventListener('drop', handleDrop);
+		item.addEventListener('mousedown', (e) => target = e.target);
+	});
+}
+
+function handleDragStart(e) {
+	var index = Array.from(boxes).indexOf(e.target);
+	if(handles[index].contains(target)) {
+		console.log(index);
+		this.style.opacity = '0.4';
+		boxes.forEach(function (item) {
+			item.classList.remove('over');
+		});
+		dragSrcEl = this;
+		e.dataTransfer.effectAllowed = 'move';
+		e.dataTransfer.setData('text/html', this.innerHTML);
+	} else {
+		e.preventDefault();
+	}
+}
+
+function handleDragEnd() {
+	this.style.opacity = '1';
+}
+
+function handleDragOver(e) {
+	if (e.preventDefault) {
+	  e.preventDefault();
+	}
+	return false;
+}
+
+function handleDragEnter() {
+	this.classList.add('over');
+}
+
+function handleDragLeave() {
+	this.classList.remove('over');
+}
+
+function handleDrop(e) {
+	e.stopPropagation(); // stops the browser from redirecting.
+	if (dragSrcEl !== this) {
+		dragSrcEl.innerHTML = this.innerHTML;
+		this.innerHTML = e.dataTransfer.getData('text/html');
+		SetupOnInputCallbacks();
+		DrawEverythingOnceAgain();
+	} else {
+		this.classList.remove('over');
+	}
+	return false;
+}
+
+var handles = null;
+var boxes = null;
+var target = null;
+
+SetupOnInputCallbacks();
+DrawEverythingOnceAgain();
