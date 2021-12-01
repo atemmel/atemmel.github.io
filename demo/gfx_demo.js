@@ -346,6 +346,12 @@ function DrawEverythingOnceAgain() {
 	TransformAndDrawBox();
 	TransformAndDrawGrid();
 	TransformAndDrawLegend();
+
+	var matrixAsArray = CalcManipulatedTransform().flat();
+	for(var i = 0; i < matrixAsArray.length; i++) {
+		var cell = document.getElementById("mat" + i);
+		cell.innerHTML = matrixAsArray[i].toFixed(3);
+	}
 }
 
 canvas.onmousedown = function(e){
@@ -485,8 +491,8 @@ function handleDrop(e) {
 	if (dragSrcEl !== this) {
 		dragSrcEl.innerHTML = this.innerHTML;
 		this.innerHTML = e.dataTransfer.getData('text/html');
-		SetupOnInputCallbacks();
 		DrawEverythingOnceAgain();
+		SetupOnInputCallbacks();
 	} else {
 		this.classList.remove('over');
 	}

@@ -33,6 +33,26 @@ body {
 	font-family: consolas;
 }
 
+.matrix {
+	position: relative;
+	padding: 0em 1em;
+}
+.matrix:before, .matrix:after {
+	content: "";
+	position: absolute;
+	top: 0;
+	border: 1px solid #000;
+	width: 6px;
+	height: 100%;
+}
+.matrix:before {
+	left: -6px;
+	border-right: 0;
+}
+.matrix:after {
+	right: -6px;
+	border-left: 0;
+}
 		</style>
 	</head>
 	<body>
@@ -79,13 +99,41 @@ body {
 						<input type="range" id="scale-x" name="scale-x" min="1" max="5", value="1", step="0.01">
 					</div>
 					<div>
-						<label for="translation-y">Y:</label>
+						<label for="scale-y">Y:</label>
 						<input type="range" id="scale-y" name="scale-y" min="1" max="5", value="1", step="0.01">
 					</div>
 					<div>
-						<label for="translation-y">Z:</label>
+						<label for="scale-y">Z:</label>
 						<input type="range" id="scale-z" name="scale-z" min="1" max="5", value="1", step="0.01">
 					</div>
+				</div>
+				<div align=center style="display: inline-block;">
+					<table class="matrix">
+						<tr>
+							<td id="mat0">0</td>
+							<td id="mat1">0</td>
+							<td id="mat2">0</td>
+							<td id="mat3">0</td>
+						</tr>
+						<tr>
+							<td id="mat4">0</td>
+							<td id="mat5">0</td>
+							<td id="mat6">0</td>
+							<td id="mat7">0</td>
+						</tr>
+						<tr>
+							<td id="mat8">0</td>
+							<td id="mat9">0</td>
+							<td id="mat10">0</td>
+							<td id="mat11">0</td>
+						</tr>
+						<tr>
+							<td id="mat12">0</td>
+							<td id="mat13">0</td>
+							<td id="mat14">0</td>
+							<td id="mat15">0</td>
+						</tr>
+					</table>
 				</div>
 			</div>
 		</div>
