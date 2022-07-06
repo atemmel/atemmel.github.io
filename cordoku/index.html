@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>cordoku!</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
+	<body onload="init()">
+		<div id="main">
+			<div id="title">cordoku!</div>
+			<canvas id="canvas" width="802px" height="802px"></canvas>
+			<div class="button-div">
+				<label for="load-from-file" class="button">
+					Load from file
+				</label>
+				<input type="file" id="load-from-file" accept=".json",>	
+				<div class="button" onclick="saveToFile()">Save to file</div>
+			</div>
+		<div>
+
+		<script src="main.js"></script>
+	</body>
+</html>
