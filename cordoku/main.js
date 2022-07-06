@@ -167,6 +167,12 @@ const selectCell = (e) => {
 		y: y,
 		type: e.button == 0 ? "number" : "annotation",
 	}
+
+	var anIndex = annotations.findIndex(a => a.x == x && a.y == y)
+	if(anIndex != -1) {
+		annotations.splice(anIndex, 1)
+	}
+
 	renderBoard()
 }
 
@@ -196,6 +202,7 @@ const onKeyPress = (e) => {
 	if(selected.type == "number") {
 		tableSet(x, y, parseInt(key))
 	} else if(selected.type == "annotation") {
+		tableSet(x, y, null)
 		var i = annotations.findIndex(a => a.x == x && a.y == y)
 		if(i != -1) {
 			var a = annotations[i]
